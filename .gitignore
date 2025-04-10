@@ -22,3 +22,12 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# 회사 데이터 파일
+company_data.csv
+
+# 환경 변수 파일
+.env
+
+# 가상 환경 디렉토리
+venv/
