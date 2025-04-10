@@ -26,3 +26,6 @@ replay_pid*
 .env
 venv/
 
+company_data.csv
+company_data.xlsx
+
