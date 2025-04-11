@@ -70,7 +70,7 @@ ensemble_retriever = EnsembleRetriever(
     retrievers=[bm25_retriever, faiss_retriever],
     weights=[0.5, 0.5], # 추후 비율 조정
 )
-# 4. Tavily 리트리버
+# 4. Tavily 리트리버    
 tavily_search = TavilySearchResults(max_results=5)
 
 #LLM
