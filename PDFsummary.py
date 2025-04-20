@@ -18,71 +18,93 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from pdf2image import convert_from_path
-from PIL import Image
 import base64
 from io import BytesIO
+
 
 load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
 images = [] # 회사 pdf에서 구성도 등의 이미지나 표도 요약에 사용하기 위해 만든 리스트
 
 # tesseract 데이터 경로 지정
-file_name = "(주)셀리즈 사업계획서(IR Deck)_v1.3.pdf"
+file_name = "(주)두뇌로세계로_연구개발계획서(R&D바우처-융합촉진형).pdf"
+
+# PDF를 구성요소별(텍스트, 이미지, 표 등)로 로드
 pdf = UnstructuredPDFLoader(
     file_name,
-    mode="elements",
-    strategy="hi_res",
-    extract_tables=True,
-    infer_table_structure=True,
-    ocr_languages="eng+kor"
+    mode="elements", # PDF를 구성 요소 단위로 분리하여 로딩 (텍스트, 이미지, 표 등으로 구분됨)
+    strategy="hi_res", # 고해상도 OCR 추출 및 좌표 기반 추출을 수행
+    extract_tables=True, # 표(Table)를 인식하여 추출
+    infer_table_structure=True, # 표의 구조(행/열/셀)를 추론하여 정돈된 형태로 반환
+    ocr_languages="eng+kor" # OCR에 사용할 언어 (영어 + 한국어)
 )
 
-try:
-    documents = pdf.load()
-    print(f"문서 개수: {len(documents)}")
-    if not documents:
-        print("문서를 불러오지 못했어요. 아무것도 추출되지 않았습니다.")
-    for i, doc in enumerate(documents):
-        print(f"\n[Doc {i+1}] type: {doc.type}")
-        print(doc.metadata)
-        print(doc.page_content[:300] if hasattr(doc, 'page_content') and doc.page_content else "(본문 없음)")
-
-except Exception as e:
-    print("오류 발생:", e)
+# PDF 문서 로드 및 요소 추출
+documents = pdf.load()
 
 
+# pdf에서 추출한 텍스트 하나로 합치기
 doc = "\n".join([doc.page_content for doc in documents])
 
-#이미지로 변환
-pages = convert_from_path(file_name, dpi=300)
-총_페이지=len(pages)
+#_________________PDF 이미지 영역 추출 및 필터링_______________________________________________________________________
+pages = convert_from_path(file_name, dpi=300) # PDF 페이지를 이미지 리스트로 변환
 
 for doc in documents:
-    if "coordinates" in doc.metadata and "points" in doc.metadata["coordinates"]:
-        x1,y1,x2,y2 = doc.metadata["coordinates"]["points"]
-        page = pages[doc.metadata["page_number"] - 1]
+    if ("coordinates" in doc.metadata and 
+        "points" in doc.metadata["coordinates"]):
+        
+        # 이미지 영역 좌표 정보 추출
+        x1,y1 = doc.metadata["coordinates"]["points"][0]
+        x2, y2 = doc.metadata["coordinates"]["points"][2]
+        width = abs(x2 - x1)
+        height = abs(y2 - y1)
+        area = width * height
+        layout_width = doc.metadata.get("layout_width")
+        layout_height = doc.metadata.get("layout_height")     
 
-        #좌표 기반 이미지 크롭
-        cropped = page.crop((x1[0], x1[1], x2[0], x2[1]))
+        # 의미 있는 이미지로 판단되는 조건 (OCR 텍스트, 키워드, 크기 비율 기준)
+        if (doc.metadata.get("category") == "Image" and 
+            (len(doc.page_content) > 30  or 
+            any(kw in doc.page_content for kw in ["시스템", "프로세스", "플로우", "구성", "구조"]) or 
+            (layout_width is not None and layout_height is not None and (area / (layout_width * layout_height))) > 0.1)):
 
-        #이미지 base64로 변환
-        buffer = BytesIO()
-        cropped.save(buffer, format="PNG")
-        img_str = base64.b64encode(buffer.getvalue()).decode()
-        image_url = f"data:image/png;base64,{img_str}"
-        images.append(image_url)
+            page = pages[doc.metadata["page_number"] - 1] # 이미지 크롭할 페이지
+
+            # 이미지 영역 잘라내고, 리사이징 후 흑백 변환 후 압축
+            cropped = page.crop((x1, y1, x2, y2))
+            small = cropped.resize((cropped.width // 2, cropped.height // 2))
+            gray = small.convert("L")
+
+            #이미지 base64로 변환
+            buffer = BytesIO()
+            gray.save(buffer, format="JPEG", quality=50)
+            img_str = base64.b64encode(buffer.getvalue()).decode()
+            image_url = f"data:image/png;base64,{img_str}"
+            images.append(image_url)
+
+print("image의 총 개수", len(images))
+#_________________________________________________________________________________________________
 
 
-# ___________ 회사 정보 요약을 위한  LLM__________________
+# ___________회사 정보 요약을 위한  LLM__________________
 # 1. 모델 초기화
+print("회사정보 요약 시작")
 client= OpenAI(api_key=api_key)
 
 # 2. 프롬프트 템플릿 정의
-contents = [{"type": "text", "text": f"회사소개서{documents}와 회사 소개서에 있던 이미지를 분석해서 회사 정보를 제공 서비스와 해결하는 문제를 중심으로 정리해주세요."}] # 지침
+contents = [{"type": "text",
+"text": f"""
+다음은 회사 소개서에서 추출한 텍스트와 이미지입니다.
+텍스트와 이미지를 참고하여 회사의 문제점, 솔루션, 비즈니스 모델, 시장 목표, 팀 구성, 차별화 포인트를 자세히 요약해 주세요.
+텍스트:
+{doc}
+"""}
+] # 지침
 
-# pdf에 모든 이미지도 LLM에 삽입하기 위한 반복문
+# LLM에 이미지 정보 추가
 for img in images:
     contents.append({"type": "image_url", "image_url": {"url": img}})
+
 # 3. 응답 생성
 response = client.chat.completions.create(
     model="gpt-4o",
@@ -92,7 +114,7 @@ response = client.chat.completions.create(
     temperature=0
 )
 
-# 4. 응답 마크다운으로 저장
+# 4. 응답 생성 후 마크다운으로 저장
 result = response.choices[0].message.content
 filename = f"summary_{file_name.replace('.pdf', '')}.md"
 with open(filename, "w", encoding="utf-8") as f:
