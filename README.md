@@ -23,10 +23,15 @@ ai-to-ai-demo/
 
 모드	설명
 🟡 CSV 기반 대화	CSV로부터 회사명/업종/연락처 추출 → 세일즈 대화 생성
+
 🔵 PDF 기반 대화	회사소개서(PDF) 텍스트 요약 → 대화 주제 자동 생성
+
 🟢 웹검색 기반 대화	DuckDuckGo 웹 검색 → 회사 정보 추출 후 대화 진행
+
 ⚪ Custom	사용자가 직접 대화 주제 입력 후 AI 간 대화
+
 💬 대화 구조
+
 GPT-3.5 기반 Sales Consultant ↔ Buyer AI가 5턴 대화
 
 각각의 역할에 맞는 system prompt 세팅
@@ -34,6 +39,7 @@ GPT-3.5 기반 Sales Consultant ↔ Buyer AI가 5턴 대화
 실시간 응답 생성 및 콘솔 출력 또는 API 응답(JSON)
 
 🔧 실행 방법
+
 📌 1. CLI 시뮬레이터 실행
 
 cd backend
