@@ -1,11 +1,10 @@
 🧠 AI-to-AI Sales Conversation Simulator
+
 GPT 기반의 AI 세일즈 컨설턴트와 바이어 역할 에이전트가
 실시간으로 대화하는 AI-to-AI 시뮬레이션 플랫폼입니다.
 
 🚀 프로젝트 구성
-bash
-복사
-편집
+
 ai-to-ai-demo/
 ├── backend/
 │   ├── app.py                 # Flask 애플리케이션 진입점
@@ -19,6 +18,7 @@ ai-to-ai-demo/
 ├── frontend/
 │   ├── src/App.js             # React 기반 UI (axios 연동)
 │   └── package.json
+
 🎯 핵심 기능
 
 모드	설명
@@ -35,15 +35,12 @@ GPT-3.5 기반 Sales Consultant ↔ Buyer AI가 5턴 대화
 
 🔧 실행 방법
 📌 1. CLI 시뮬레이터 실행
-bash
-복사
-편집
+
 cd backend
 python peak_agent_conversation.py
+
 📌 2. Flask API 실행
-bash
-복사
-편집
+
 cd backend
 python app.py
 Swagger 문서 연동 예정
@@ -59,18 +56,14 @@ GET /api/pdf
 GET /api/web
 
 📌 3. React UI 실행
-bash
-복사
-편집
+
 cd frontend
 npm install
 npm start
 모드 선택 드롭다운 + 프롬프트 입력 → 실시간 응답 확인 가능
 
 📦 설치 패키지 (requirements.txt)
-txt
-복사
-편집
+
 openai
 flask
 python-dotenv
@@ -79,6 +72,7 @@ PyPDF2
 duckduckgo-search
 beautifulsoup4
 requests
+
 ⚙️ 진행 중
  대화 기록 히스토리 API화
 
