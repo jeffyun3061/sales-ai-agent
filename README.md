@@ -7,17 +7,17 @@ GPT 기반의 AI 세일즈 컨설턴트와 바이어 역할 에이전트가
 
 ai-to-ai-demo/
 ├── backend/
-│   ├── app.py                 # Flask 애플리케이션 진입점
-│   ├── peak_agent_conversation.py  # CLI 기반 AI 시뮬레이터
-│   ├── routes.py              # API 라우팅 (Blueprint)
-│   ├── utils/ or peak/        # csv/pdf/web 유틸리티
-│   ├── data/                  # company_data.csv
-│   ├── docs/                  # 회사소개서 PDF
-│   └── .env                   # OpenAI API Key
+│ ├── app.py # Flask 애플리케이션 진입점
+│ ├── peak_agent_conversation.py # CLI 기반 AI 시뮬레이터
+│ ├── routes.py # API 라우팅 (Blueprint)
+│ ├── utils/ or peak/ # csv/pdf/web 유틸리티 모듈
+│ ├── data/ # 기업 리스트 CSV 파일
+│ ├── docs/ # 회사소개서 PDF 파일 모음
+│ └── .env # OpenAI API Key 보관
 │
 ├── frontend/
-│   ├── src/App.js             # React 기반 UI (axios 연동)
-│   └── package.json
+│ ├── src/App.js # React 기반 프론트엔드 진입점 (axios API 연동)
+│ └── package.json # 프론트엔드 패키지 설정 파일
 
 🎯 핵심 기능
 
