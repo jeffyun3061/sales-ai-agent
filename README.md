@@ -1,4 +1,4 @@
-🧠 AI-to-AI Sales Conversation Simulator
+🧠 AI-to-AI Sales Conversation Simulator beta
 
 GPT 기반의 AI 세일즈 컨설턴트와 바이어 역할 에이전트가
 실시간으로 대화하는 AI-to-AI 시뮬레이션 플랫폼입니다.
